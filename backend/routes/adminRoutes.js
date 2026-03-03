@@ -1,0 +1,75 @@
+﻿const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const Admin = require("../models/Admin");
+const Message = require("../models/Message");
+const { requireAdminAuth } = require("../middleware/authMiddleware");
+const { sanitizeText } = require("../utils/validation");
+
+const router = express.Router();
+
+router.post("/login", async (req, res) => {
+  try {
+    const email = sanitizeText(req.body.email).toLowerCase();
+    const password = String(req.body.password || "").trim();
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required." });
+    }
+
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(401).json({ message: "Invalid credentials." });
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials." });
+    }
+
+    const token = jwt.sign(
+      {
+        adminId: admin._id,
+        email: admin.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "8h" }
+    );
+
+    return res.json({ token });
+  } catch (_error) {
+    return res.status(500).json({ message: "Login failed." });
+  }
+});
+
+router.get("/messages", requireAdminAuth, async (_req, res) => {
+  try {
+    const messages = await Message.find(
+      { message: { $exists: true, $ne: "" } },
+      { __v: 0 }
+    )
+      .sort({ createdAt: -1 })
+      .lean();
+    return res.json({ messages });
+  } catch (_error) {
+    return res.status(500).json({ message: "Failed to load messages." });
+  }
+});
+
+router.delete("/messages/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Message.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Message not found." });
+    }
+
+    return res.json({ message: "Message deleted successfully." });
+  } catch (_error) {
+    return res.status(400).json({ message: "Invalid message id." });
+  }
+});
+
+module.exports = router;
