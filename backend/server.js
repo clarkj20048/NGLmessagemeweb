@@ -12,10 +12,32 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
+const defaultAllowedOrigins = ["http://localhost:5173", "https://nglmessagemeweb.vercel.app"];
+const envAllowedOrigins = (process.env.CLIENT_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
+const allowedOrigins = new Set([
+  ...defaultAllowedOrigins.map((origin) => origin.replace(/\/+$/, "")),
+  ...envAllowedOrigins,
+]);
 
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+    origin(origin, callback) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const normalizedOrigin = origin.replace(/\/+$/, "");
+      if (allowedOrigins.has(normalizedOrigin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
   })
 );
