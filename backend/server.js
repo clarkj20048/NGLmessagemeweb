@@ -1,5 +1,4 @@
 ﻿const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
@@ -59,13 +58,6 @@ app.use((err, _req, res, _next) => {
 async function startServer() {
   try {
     await ensureStoreFile();
-
-    if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI is missing in environment variables");
-    }
-
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("Connected to MongoDB");
 
     app.listen(port, () => {
       console.log(`Server running at http://localhost:${port}`);

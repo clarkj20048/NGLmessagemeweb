@@ -2,10 +2,13 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const Admin = require("../models/Admin");
-const Message = require("../models/Message");
 const { requireAdminAuth } = require("../middleware/authMiddleware");
 const { sanitizeText } = require("../utils/validation");
+const {
+  findAdminByEmail,
+  listSubmittedMessages,
+  deleteMessageById,
+} = require("../utils/jsonStore");
 
 const router = express.Router();
 
@@ -18,7 +21,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Email and password are required." });
     }
 
-    const admin = await Admin.findOne({ email });
+    const admin = await findAdminByEmail(email);
     if (!admin) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
@@ -45,12 +48,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/messages", requireAdminAuth, async (_req, res) => {
   try {
-    const messages = await Message.find(
-      { message: { $exists: true, $ne: "" } },
-      { __v: 0 }
-    )
-      .sort({ createdAt: -1 })
-      .lean();
+    const messages = await listSubmittedMessages();
     return res.json({ messages });
   } catch (_error) {
     return res.status(500).json({ message: "Failed to load messages." });
@@ -60,7 +58,7 @@ router.get("/messages", requireAdminAuth, async (_req, res) => {
 router.delete("/messages/:id", requireAdminAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await Message.findByIdAndDelete(id);
+    const deleted = await deleteMessageById(id);
 
     if (!deleted) {
       return res.status(404).json({ message: "Message not found." });
@@ -68,7 +66,7 @@ router.delete("/messages/:id", requireAdminAuth, async (req, res) => {
 
     return res.json({ message: "Message deleted successfully." });
   } catch (_error) {
-    return res.status(400).json({ message: "Invalid message id." });
+    return res.status(500).json({ message: "Failed to delete message." });
   }
 });
 

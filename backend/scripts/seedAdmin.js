@@ -1,37 +1,25 @@
-﻿const bcrypt = require("bcryptjs");
-const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 
-const Admin = require("../models/Admin");
+const { ensureStoreFile, upsertAdmin } = require("../utils/jsonStore");
 
 dotenv.config();
 
 async function main() {
-  const { MONGO_URI, ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
+  const { ADMIN_EMAIL, ADMIN_PASSWORD } = process.env;
 
-  if (!MONGO_URI || !ADMIN_EMAIL || !ADMIN_PASSWORD) {
-    throw new Error("MONGO_URI, ADMIN_EMAIL, and ADMIN_PASSWORD are required in .env");
+  if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD are required in .env");
   }
 
-  await mongoose.connect(MONGO_URI);
-
+  await ensureStoreFile();
   const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
-
-  await Admin.findOneAndUpdate(
-    { email: ADMIN_EMAIL.toLowerCase().trim() },
-    {
-      email: ADMIN_EMAIL.toLowerCase().trim(),
-      passwordHash,
-    },
-    { upsert: true, new: true }
-  );
+  await upsertAdmin(ADMIN_EMAIL, passwordHash);
 
   console.log("Admin user created/updated successfully.");
-  await mongoose.disconnect();
 }
 
-main().catch(async (error) => {
+main().catch((error) => {
   console.error(error.message);
-  await mongoose.disconnect();
   process.exit(1);
 });

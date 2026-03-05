@@ -1,8 +1,7 @@
 const express = require("express");
 
-const Message = require("../models/Message");
 const { validateProfilePayload } = require("../utils/validation");
-const { saveProfileInput } = require("../utils/jsonStore");
+const { createProfile } = require("../utils/jsonStore");
 
 const router = express.Router();
 
@@ -14,12 +13,7 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Validation failed", errors });
     }
 
-    const profile = await Message.create({
-      ...sanitized,
-      anonymousName: "",
-      message: "",
-    });
-    await saveProfileInput(profile);
+    const profile = await createProfile(sanitized);
 
     return res.status(201).json({
       message: "Profile created successfully.",

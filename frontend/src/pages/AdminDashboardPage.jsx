@@ -56,7 +56,16 @@ function AdminDashboardPage() {
     navigate("/admin/login");
   }
 
+  function resolveMessageId(msg) {
+    return msg?._id || msg?.profileId || msg?.id || "";
+  }
+
   async function handleDelete(messageId) {
+    if (!messageId) {
+      setError("Missing message id. Refresh and try again.");
+      return;
+    }
+
     const token = localStorage.getItem("adminToken");
     if (!token) {
       navigate("/admin/login");
@@ -130,8 +139,10 @@ function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {messages.map((msg) => (
-                  <tr key={msg._id}>
+                {messages.map((msg) => {
+                  const messageId = resolveMessageId(msg);
+                  return (
+                  <tr key={messageId || `${msg.fullName}-${msg.createdAt}`}>
                     <td>
                       <div className="dashboard-name-cell">
                         {msg.profileImage ? (
@@ -168,14 +179,15 @@ function AdminDashboardPage() {
                       <button
                         type="button"
                         className="table-delete-btn"
-                        onClick={() => handleDelete(msg._id)}
-                        disabled={deletingId === msg._id}
+                        onClick={() => handleDelete(messageId)}
+                        disabled={!messageId || deletingId === messageId}
                       >
-                        {deletingId === msg._id ? "Deleting..." : "Delete"}
+                        {deletingId === messageId ? "Deleting..." : "Delete"}
                       </button>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

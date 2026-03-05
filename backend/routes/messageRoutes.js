@@ -1,9 +1,7 @@
 const express = require("express");
-const mongoose = require("mongoose");
 
-const Message = require("../models/Message");
 const { validateMessagePayload } = require("../utils/validation");
-const { saveMessageInput } = require("../utils/jsonStore");
+const { updateMessageByProfileId } = require("../utils/jsonStore");
 
 const router = express.Router();
 
@@ -15,24 +13,14 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ message: "Validation failed", errors });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(sanitized.profileId)) {
-      return res.status(400).json({ message: "Validation failed", errors: { profileId: "Invalid profile id." } });
-    }
-
-    const saved = await Message.findByIdAndUpdate(
-      sanitized.profileId,
-      {
-        anonymousName: sanitized.anonymousName,
-        message: sanitized.message,
-      },
-      { new: true }
-    );
+    const saved = await updateMessageByProfileId(sanitized.profileId, {
+      anonymousName: sanitized.anonymousName,
+      message: sanitized.message,
+    });
 
     if (!saved) {
       return res.status(404).json({ message: "Profile not found." });
     }
-    await saveMessageInput(saved);
-
     return res.status(200).json({
       message: "Message submitted successfully.",
       data: {
