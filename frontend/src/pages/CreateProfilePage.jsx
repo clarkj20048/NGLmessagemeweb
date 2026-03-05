@@ -7,6 +7,7 @@ const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif
 function CreateProfilePage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    email: "",
     fullName: "",
     age: "",
     profileImage: "",
@@ -53,8 +54,16 @@ function CreateProfilePage() {
 
   function validate() {
     const nextErrors = {};
+    const email = formData.email.trim();
     const fullName = formData.fullName.trim();
     const ageValue = Number(formData.age);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email) {
+      nextErrors.email = "Email is required.";
+    } else if (!emailRegex.test(email)) {
+      nextErrors.email = "Enter a valid email address.";
+    }
 
     if (!fullName) {
       nextErrors.fullName = "Full name is required.";
@@ -66,7 +75,7 @@ function CreateProfilePage() {
     }
 
     if (!Number.isInteger(ageValue) || ageValue < 1 || ageValue > 120) {
-      nextErrors.age = "Age must be a number between 1 and 120.";
+      nextErrors.age = "Age is required.";
     }
 
     if (!formData.profileImage) {
@@ -93,6 +102,7 @@ function CreateProfilePage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          email: formData.email,
           fullName: formData.fullName,
           age: Number(formData.age),
           profileImage: formData.profileImage,
@@ -113,6 +123,7 @@ function CreateProfilePage() {
         "activeProfile",
         JSON.stringify({
           id: data.data.id,
+          email: data.data.email,
           fullName: data.data.fullName,
           age: data.data.age,
           profileImage: formData.profileImage,
@@ -131,10 +142,10 @@ function CreateProfilePage() {
     <div className="page-bg ngl-surface">
       <main className="message-wrap">
         <div className="logo-holder">
-          <img className="ngl-logo" src="/nglheaderlogo-removebg-preview.png" alt="NGL logo" />
+          <img className="ngl-logo" src="/nglogo2-soft.png" alt="NGL logo" />
         </div>
         <h1 className="prompt-title">Create Profile</h1>
-        <p className="prompt-subtitle">Upload your picture, add your name and age to continue.</p>
+        <p className="prompt-subtitle">Upload your picture, add your email, name, and age to continue.</p>
 
         <form className="form ngl-form" onSubmit={handleSubmit} noValidate>
           <label htmlFor="profileImage">Profile Picture</label>
@@ -151,6 +162,18 @@ function CreateProfilePage() {
           <p className="file-name-text">{selectedFileName}</p>
           {errors.profileImage && <p className="error">{errors.profileImage}</p>}
           {previewUrl && <img className="profile-preview" src={previewUrl} alt="Profile preview" />}
+
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter Email"
+            autoComplete="email"
+          />
+          {errors.email && <p className="error">{errors.email}</p>}
 
           <label htmlFor="fullName">Full Name</label>
           <input

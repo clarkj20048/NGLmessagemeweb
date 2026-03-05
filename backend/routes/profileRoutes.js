@@ -25,6 +25,7 @@ router.post("/", async (req, res) => {
       message: "Profile created successfully.",
       data: {
         id: profile._id,
+        email: profile.email,
         fullName: profile.fullName,
         age: profile.age,
       },

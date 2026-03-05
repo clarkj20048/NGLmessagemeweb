@@ -51,6 +51,7 @@ function validateMessagePayload(payload) {
 }
 
 function validateProfilePayload(payload) {
+  const email = sanitizeText(payload.email).toLowerCase();
   const fullName = sanitizeText(payload.fullName);
   const profileImage = String(payload.profileImage || "").trim();
   const ageNumber = Number(payload.age);
@@ -58,6 +59,12 @@ function validateProfilePayload(payload) {
   const imageMimeType = imageMimeMatch ? imageMimeMatch[1].toLowerCase() : "";
 
   const errors = {};
+
+  if (!email) {
+    errors.email = "Email is required.";
+  } else if (!validator.isEmail(email)) {
+    errors.email = "Email must be valid.";
+  }
 
   if (!fullName) {
     errors.fullName = "Full name is required.";
@@ -75,6 +82,7 @@ function validateProfilePayload(payload) {
 
   return {
     sanitized: {
+      email,
       fullName,
       age: ageNumber,
       profileImage,

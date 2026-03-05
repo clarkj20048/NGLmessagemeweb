@@ -113,7 +113,7 @@ function MessagePage() {
     <div className="page-bg ngl-surface">
       <main className="message-wrap">
         <div className="logo-holder">
-          <img className="ngl-logo" src="/nglheaderlogo-removebg-preview.png" alt="NGL logo" />
+          <img className="ngl-logo" src="/nglogo2-soft.png" alt="NGL logo" />
         </div>
         <h1 className="prompt-title">Drop an anonymous message</h1>
         <p className="prompt-subtitle">ONLY YOUR ANONYMOUS DISPLAY NAME APPEARS PUBLICLY.</p>

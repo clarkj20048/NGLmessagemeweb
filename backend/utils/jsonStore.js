@@ -35,6 +35,7 @@ async function saveProfileInput(profile) {
   const store = await readStore();
   store.submissions.push({
     profileId: String(profile._id),
+    email: profile.email,
     fullName: profile.fullName,
     age: profile.age,
     profileImage: profile.profileImage,
@@ -58,6 +59,7 @@ async function saveMessageInput(messageDoc) {
   } else {
     store.submissions.push({
       profileId,
+      email: messageDoc.email || "",
       fullName: messageDoc.fullName || "",
       age: messageDoc.age || null,
       profileImage: messageDoc.profileImage || "",

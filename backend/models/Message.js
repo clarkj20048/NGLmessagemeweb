@@ -2,6 +2,12 @@
 
 const messageSchema = new mongoose.Schema(
   {
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
     fullName: {
       type: String,
       required: true,
