@@ -63,7 +63,14 @@ Frontend:
 
 3. Seed admin credentials
 
-Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `backend/.env`, then run:
+Option A (without storing admin password in `.env`):
+
+```bash
+cd backend
+npm run seed:admin -- admin@example.com MyStrongPass123!
+```
+
+Option B (using `.env` values `ADMIN_EMAIL` and `ADMIN_PASSWORD`):
 
 ```bash
 cd backend
@@ -101,8 +108,8 @@ npm run dev
 4. Add environment variables in Render:
    - `JWT_SECRET` = strong random string
    - `CLIENT_ORIGIN` = `https://nglmessagemeweb.vercel.app`
-   - `ADMIN_EMAIL` = your admin email
-   - `ADMIN_PASSWORD` = your admin password
+   - `ADMIN_EMAIL` = your admin email (optional if using CLI args to seed)
+   - `ADMIN_PASSWORD` = your admin password (optional if using CLI args to seed)
    - `STORE_FILE_PATH` = `/var/data/submissions.json` (recommended when using a Render disk)
 5. (Recommended) Attach a persistent disk in Render and mount it to `/var/data`.
 6. Deploy the service.

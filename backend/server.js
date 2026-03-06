@@ -1,4 +1,5 @@
 ﻿const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
@@ -11,32 +12,10 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
-const defaultAllowedOrigins = ["http://localhost:5173", "https://nglmessagemeweb.vercel.app"];
-const envAllowedOrigins = (process.env.CLIENT_ORIGIN || "")
-  .split(",")
-  .map((origin) => origin.trim().replace(/\/+$/, ""))
-  .filter(Boolean);
-const allowedOrigins = new Set([
-  ...defaultAllowedOrigins.map((origin) => origin.replace(/\/+$/, "")),
-  ...envAllowedOrigins,
-]);
 
 app.use(
   cors({
-    origin(origin, callback) {
-      if (!origin) {
-        callback(null, true);
-        return;
-      }
-
-      const normalizedOrigin = origin.replace(/\/+$/, "");
-      if (allowedOrigins.has(normalizedOrigin)) {
-        callback(null, true);
-        return;
-      }
-
-      callback(new Error(`CORS blocked for origin: ${origin}`));
-    },
+    origin: process.env.CLIENT_ORIGIN || "https://nglmessagemeweb.vercel.app/",
     credentials: true,
   })
 );
@@ -58,6 +37,13 @@ app.use((err, _req, res, _next) => {
 async function startServer() {
   try {
     await ensureStoreFile();
+
+    if (!process.env.MONGO_URI) {
+      throw new Error("MONGO_URI is missing in environment variables");
+    }
+
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("Connected to MongoDB");
 
     app.listen(port, () => {
       console.log(`Server running at http://localhost:${port}`);
