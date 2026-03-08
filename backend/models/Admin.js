@@ -19,7 +19,7 @@ const adminSchema = new mongoose.Schema(
   }
 );
 
-adminSchema.index({ email: 1 });
+// Note: index not needed here since unique: true automatically creates an index
 
 module.exports = mongoose.model("Admin", adminSchema);
 
