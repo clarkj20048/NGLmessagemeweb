@@ -2,19 +2,22 @@
 const cors = require("cors");
 const dotenv = require("dotenv");
 
+const connectDB = require("./config/db");
 const messageRoutes = require("./routes/messageRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-const { ensureStoreFile } = require("./utils/jsonStore");
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
+// Connect to MongoDB
+connectDB();
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "https://nglmessagemeweb.vercel.app/",
+    origin: process.env.CLIENT_ORIGIN || "https://nglmessagemeweb.vercel.app",
     credentials: true,
   })
 );
@@ -33,18 +36,7 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ message: "Internal server error" });
 });
 
-async function startServer() {
-  try {
-    await ensureStoreFile();
-    console.log("JSON store initialized successfully");
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
 
-    app.listen(port, () => {
-      console.log(`Server running at http://localhost:${port}`);
-    });
-  } catch (error) {
-    console.error("Failed to start server:", error.message);
-    process.exit(1);
-  }
-}
-
-startServer();

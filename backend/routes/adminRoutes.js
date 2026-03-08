@@ -8,7 +8,7 @@ const {
   findAdminByEmail,
   listSubmittedMessages,
   deleteMessageById,
-} = require("../utils/jsonStore");
+} = require("../utils/mongoStore");
 
 const router = express.Router();
 
@@ -41,7 +41,8 @@ router.post("/login", async (req, res) => {
     );
 
     return res.json({ token });
-  } catch (_error) {
+  } catch (error) {
+    console.error("Error in admin login:", error);
     return res.status(500).json({ message: "Login failed." });
   }
 });
@@ -50,7 +51,8 @@ router.get("/messages", requireAdminAuth, async (_req, res) => {
   try {
     const messages = await listSubmittedMessages();
     return res.json({ messages });
-  } catch (_error) {
+  } catch (error) {
+    console.error("Error fetching messages:", error);
     return res.status(500).json({ message: "Failed to load messages." });
   }
 });
@@ -65,9 +67,11 @@ router.delete("/messages/:id", requireAdminAuth, async (req, res) => {
     }
 
     return res.json({ message: "Message deleted successfully." });
-  } catch (_error) {
+  } catch (error) {
+    console.error("Error deleting message:", error);
     return res.status(500).json({ message: "Failed to delete message." });
   }
 });
 
 module.exports = router;
+

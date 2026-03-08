@@ -1,7 +1,7 @@
 const express = require("express");
 
 const { validateProfilePayload } = require("../utils/validation");
-const { createProfile } = require("../utils/jsonStore");
+const { createProfile } = require("../utils/mongoStore");
 
 const router = express.Router();
 
@@ -24,9 +24,11 @@ router.post("/", async (req, res) => {
         age: profile.age,
       },
     });
-  } catch (_error) {
+  } catch (error) {
+    console.error("Error in profileRoutes:", error);
     return res.status(500).json({ message: "Failed to create profile." });
   }
 });
 
 module.exports = router;
+

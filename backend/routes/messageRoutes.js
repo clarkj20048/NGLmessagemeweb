@@ -1,7 +1,6 @@
 const express = require("express");
-
 const { validateMessagePayload } = require("../utils/validation");
-const { updateMessageByProfileId } = require("../utils/jsonStore");
+const { updateMessageByProfileId } = require("../utils/mongoStore");
 
 const router = express.Router();
 
@@ -30,9 +29,11 @@ router.post("/", async (req, res) => {
         createdAt: saved.createdAt,
       },
     });
-  } catch (_error) {
+  } catch (error) {
+    console.error("Error in messageRoutes:", error);
     return res.status(500).json({ message: "Failed to save message" });
   }
 });
 
 module.exports = router;
+

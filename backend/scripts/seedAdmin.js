@@ -2,7 +2,8 @@ const bcrypt = require("bcryptjs");
 const dotenv = require("dotenv");
 const validator = require("validator");
 
-const { ensureStoreFile, upsertAdmin } = require("../utils/jsonStore");
+const connectDB = require("../config/db");
+const { upsertAdmin } = require("../utils/mongoStore");
 
 dotenv.config();
 
@@ -29,7 +30,9 @@ async function main() {
     throw new Error("Admin email must be a valid email address.");
   }
 
-  await ensureStoreFile();
+  // Connect to MongoDB first
+  await connectDB();
+  
   const passwordHash = await bcrypt.hash(password, 12);
   await upsertAdmin(email, passwordHash);
 
@@ -40,3 +43,4 @@ main().catch((error) => {
   console.error(error.message);
   process.exit(1);
 });
+
